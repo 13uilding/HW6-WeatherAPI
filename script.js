@@ -1,6 +1,7 @@
 // VARIABLES
 var queryURL;
 var cityStr;
+var currentPositionArr = [];
 var cities = [];
 
 // TARGETS
@@ -14,10 +15,20 @@ var citiesField = $(".citiesField");
 
 
 // FUNCTIONS
+function successCallBack(position){
+    var lat = position.coords.latitude;
+    var lng = position.coords.longitude;
+    var positionArr = [lat, lng];
+    console.log(positionArr);
+    return positionArr;
+};
+function failCallBack(){
+    return console.log("Failed");
+};
+
 function init(){
     console.log("HI");
-    // Function: Need the location grabbed from window
-        // Figure out how to get that, and if I need to notify the user.
+    currentPositionArr = navigator.geolocation.getCurrentPosition(successCallBack, failCallBack);
     // Function: Grab the current day and next 6 days
         // moment() for current day
         // moment().get() for the remaining days    
@@ -33,6 +44,7 @@ function init(){
         // $(`<li>${cities[i]}`) 
 };
 
+init();
 // function displayStates(state){
 //     switch(state){
 //         case "loading":
