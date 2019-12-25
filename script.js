@@ -61,6 +61,7 @@ function codeLatLng(lat, lng) {
              for (var i=0; i<results[0].address_components.length; i++) {
                  // We then loop over the different types per individual address
             for (var b=0;b<results[0].address_components[i].types.length;b++) {
+                console.log(`${results[0].address_components[i]} has the type ${results[0].address_components[i]}.types[b]`)
             //there are different types that might hold a city admin_area_lvl_1 usually does in come cases looking for sublocality type will be more appropriate
             // Use if to find what you are looking for
                 if (results[0].address_components[i].types[b] == "administrative_area_level_1") {
@@ -83,12 +84,12 @@ function codeLatLng(lat, lng) {
     });
   }
 
-init();
   // Attempts to get the current location Not positive the location of this
   if (navigator.geolocation) {
-    navigator.geolocation.getCurrentPosition(successCallBack, failCallBack);
+      navigator.geolocation.getCurrentPosition(successCallBack, failCallBack);
     };
-// function displayStates(state){
+init();
+    // function displayStates(state){
 //     switch(state){
 //         case "loading":
 //             console.log("Data hasn't loaded yet, so what should I display?");
