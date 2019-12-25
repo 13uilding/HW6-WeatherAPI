@@ -45,6 +45,7 @@ function init(){
 
 // THIS FUNCTION IS GRABBED FROM GEOLOCATION STACKED EXCHANGE
 function codeLatLng(lat, lng) {
+    console.log("Made it inside codeLatLng")
     // Google.maps.latlng
     var latlng = new google.maps.LatLng(lat, lng);
     // geocode method (geocoder was initialized from google.maps.Geocoder())
@@ -88,7 +89,16 @@ function codeLatLng(lat, lng) {
   if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(successCallBack, failCallBack);
     };
+
+
 init();
+
+
+
+
+
+
+
     // function displayStates(state){
 //     switch(state){
 //         case "loading":
