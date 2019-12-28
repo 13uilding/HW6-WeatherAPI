@@ -13,26 +13,36 @@
   <script type="text/javascript" src="https://maps.googleapis.com/maps/api/js?key=sensor=false"></script> 
   <link rel="stylesheet" type="text/css" href="style.css">
 </head>
-<body>
-    <div class="container">
+<body class="bg-light">
+    <div class="container bg-light">
         <div class="row">
-            <div class="col">
+            <div class="col text-center bg-info">
                 <h1>Weather Forecast</h1>
                 <h3 class="currentlyDisplaying" data-location="current-location">Displaying: Location</h3>
             </div>
         </div>
         <div class="row">
-            <div class="col citiesField">
-
+            <div class="col-4-md citiesField">
+                <div class="form-group">
+                    <label for="cityInput">City Search Field</label>
+                    <input type="text" class="form-control" id="cityInput" placeholder="City">
+                </div>
+                <button type="button" class="btn btn-outline-primary">Search</button>
+                <button type="button" class="btn btn-outline-warning">Clear</button>
+                <ul class="list-group citiesList"> 
+                </ul>
+                <!-- <button type="button" class="btn btn-outline-success">Success</button> -->
             </div>
-            <div class="col">
+            <div class="col forecastField">
                 <div class="row">
                     <div class="col focusDay">
 
                     </div>
-                    <div class="col remaining6Days">
+                <div class="row">
+                    <div class="col remaining5Days">
 
                     </div>
+                </div>
                 </div>
             </div>
 
@@ -42,5 +52,5 @@
     </div>
 
     <script src="script.js"></script>
-</body>
+</body c>
 </html>
