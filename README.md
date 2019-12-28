@@ -7,6 +7,7 @@ Second, when the user enters their desired location or press one of the cached l
 Third, the application will store locations on the left of the page and in local stored for easy access in the future.
 The application will utilize open weather API and google maps API to display forecast of the entered location.
 
-
+Deployed URL:   https://13uilding.github.io/HW6-WeatherAPI/
+gitHub URL:     https://github.com/13uilding/HW6-WeatherAPI
 ++++About++++
 
