@@ -10,7 +10,9 @@
   src="https://code.jquery.com/jquery-3.4.1.min.js"
   integrity="sha256-CSXorXvZcTkaix6Yvo6HppcZGetbYMGWSFlBw8HfCJo="
   crossorigin="anonymous"></script>
-  <script type="text/javascript" src="https://maps.googleapis.com/maps/api/js?key=sensor=false"></script> 
+  <!-- Add this if I want to try out bulma -->
+  <!-- <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.8.0/css/bulma.min.css"> -->
+  <script defer src="https://use.fontawesome.com/releases/v5.3.1/js/all.js"></script>
   <link rel="stylesheet" type="text/css" href="style.css">
 </head>
 <body class="bg-light">
@@ -23,13 +25,13 @@
         </div>
         <div class="row">
             <div class="col-4-md citiesField">
-                <div class="form-group">
+                <form class="cityForm">
                     <label for="cityInput">City Search Field</label>
-                    <input type="text" class="form-control" id="cityInput" placeholder="City">
-                </div>
-                <button type="button" class="btn btn-outline-primary">Search</button>
-                <button type="button" class="btn btn-outline-warning">Clear</button>
-                <ul class="list-group citiesList"> 
+                    <input type="text" class="form-control" id="cityInput" placeholder="Enter City">
+                </form>
+                <button type="button" class="btn btn-outline-primary" id="searchBtn"><i class="fas fa-search-location"></i></button> 
+                <button type="button" class="btn btn-outline-warning" id="clearBtn"><i class="fas fa-times-circle"></i></button>
+                <ul class="list-group citiesList mt-1"> 
                 </ul>
                 <!-- <button type="button" class="btn btn-outline-success">Success</button> -->
             </div>
@@ -52,5 +54,17 @@
     </div>
 
     <script src="script.js"></script>
-</body c>
+
+    <!-- If I add Bulma then try this out -->
+  <!-- <section class="section">
+    <div class="container">
+      <h1 class="title">
+        Hello World
+      </h1>
+      <p class="subtitle">
+        My first website with <strong>Bulma</strong>!
+      </p>
+    </div> -->
+  
+</body>
 </html>
