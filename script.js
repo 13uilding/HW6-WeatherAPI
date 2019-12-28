@@ -11,34 +11,38 @@ var citiesField = $(".citiesField");
 var citiesList = $(".citiesList")
 var searchBtn = $("#searchBtn");
 var clearBtn = $("#clearBtn");
-// 
+// OpenWeather
+var APIKey = "8b1406f6dfd91995f05edf59eb9d8b9c";
+// Here we are building the URL we need to query the database
 
 // BUTTONS
 searchBtn.on("click", function(event){
     event.preventDefault();
-    var city = cityInput.val().trim();
-    cities.push(city);
-    console.log(`cityInput: ${city}`);
-    renderButtons(cities);
-    cityInput.val("");
+    console.log("fix me: Make a single function to handle this and the submit")
+
 
 })
 clearBtn.on("click", function(event){
     event.preventDefault();
     cityInput.val("");
 })
-// <button type="button" class="btn btn-outline-success">Success</button>
 
-// Events
+// EVENTS
 $(".cityForm").on("submit", function(event){
     event.preventDefault();
-    var city = cityInput.val().trim();
-    cities.push(city);
-    console.log(`cityInput: ${city}`);
+    var city = cityUpdate();
+    // console.log("Form Btn Pushed: " + city);
     renderButtons(cities);
-    cityInput.val("");
+    getForecast(city);
 
 });
+
+$(".citiesList").on("click", "button", function( event ){
+    event.preventDefault();
+    var city = $(this).text();
+    console.log( $(this).text() );
+})
+
 
 // FUNCTIONS
 function init(){
@@ -64,11 +68,45 @@ function init(){
 function renderButtons(arr){
     citiesList.empty();
     arr.forEach(function(city){
-        var cityBtn = $(`<button type="button" class="btn btn-outline-success" data-name="${city}">${city}</button>`);
+        var cityBtn = $(`<button type="button" class="btn btn-outline-success cityBtn" data-name="${city}">${city}</button>`);
         citiesList.prepend(cityBtn);
-    });
-
-    
+    });   
+}
+function cityUpdate(){
+    var city = cityInput.val().trim();
+    cityInput.val("");
+    // This is where I would add a function to update the words to title case
+    cities.push(city);
+    // console.log(`cityInput: ${city}`);
+    return city;
+}
+function getForecast(city){
+    // api.openweathermap.org/data/2.5/forecast?q={city name},{country code}
+    var countryCode = "840"; // United States (get the proper country code)(search cities api)
+    var queryURL = `https://api.openweathermap.org/data/2.5/forecast?q=${city},${countryCode}&APPID=${APIKey}&units=Imperial`;
+    $.ajax({
+        url: queryURL,
+        method: "GET"
+      }).then(function(response){
+        console.log(response)
+        // city.city.id, name, coord.lat, lon, country, population, timezone, sunrise, sunset 
+        // city.list[0, 39]
+        var foreCastArr = response.list;
+        foreCastArr.forEach(function(hourly3Report){
+            console.log(hourly3Report.dt_txt); //it works
+            // Getting the high and low for the day
+            //.dt 
+            //.main.temp
+            //.temp_min
+            //.temp_max
+            //.humidity
+            //.weather.icon
+            //.wind.speed,
+            //.dt_txt "2019-12-29 21:00:00"
+        });
+        return console.log("BRO");
+        // Moment.js incorporate
+      });
 }
 
 
