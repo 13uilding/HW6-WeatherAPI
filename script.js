@@ -22,6 +22,9 @@ function successCallBack(position){
     codeLatLng(lat, lng)
 };
 function failCallBack(){
+    var lat = 39.81029420000001;
+    var lng = -105.1477529;
+    codeLatLng(lat, lng)
     return alert("Geocoder failed");
 };
 
