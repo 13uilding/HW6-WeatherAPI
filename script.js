@@ -1,10 +1,10 @@
-// VARIABLES
+// ++++VARIABLES++++
 var queryURL;
 var cityStr;
 var cities = [];
 
 // TARGETS
-var currentlyDisplayingHeader = $("h3.currentlyDisplaying"); // use .text("To change it")
+var currentlyDisplayingHeader = $("h3.currentlyDisplaying");
 // City
 var cityInput = $("#cityInput");
 var citiesField = $(".citiesField");
@@ -13,12 +13,11 @@ var searchBtn = $("#searchBtn");
 var clearBtn = $("#clearBtn");
 // OpenWeather
 var APIKey = "8b1406f6dfd91995f05edf59eb9d8b9c";
-// Here we are building the URL we need to query the database
 
-// BUTTONS
+// ++++BUTTONS++++
 searchBtn.on("click", function(event){
     event.preventDefault();
-    console.log("fix me: Make a single function to handle this and the submit")
+    console.log("fix me: Make a single function to handle this and submit event")
 
 
 })
@@ -27,7 +26,7 @@ clearBtn.on("click", function(event){
     cityInput.val("");
 })
 
-// EVENTS
+// ++++EVENTS++++
 $(".cityForm").on("submit", function(event){
     event.preventDefault();
     var city = cityUpdate();
@@ -48,26 +47,12 @@ $(".citiesList").on("click", "button", function( event ){
 function init(){
     console.log("HI");
     renderButtons(cities);
-};
-    // Function: Grab the current day and next 6 days
-        // moment() for current day
-        // moment().get() for the remaining days    
+};  
 
-    // Function: Display the weather param1(where the user currently is)
-        // Going to have the current day as the focus
-        // The next 6 days will show up to the right
-
-    // Get stored searched cities.
-        // Need to look at localStorage
-
-    // Function: Display past searched cities on the left
-        // Add the city that is inputed into the field
-        // Display the new array list
-        // Gonna want to use the .empty 
-        // $(`<li>${cities[i]}`) 
 function renderButtons(arr){
     citiesList.empty();
     arr.forEach(function(city){
+        // Make a button inside this button to erase the local storage and the button from the html. Prevent bubbling
         var cityBtn = $(`<button type="button" class="btn btn-outline-success cityBtn" data-name="${city}">${city}</button>`);
         citiesList.prepend(cityBtn);
     });   
@@ -80,6 +65,13 @@ function cityUpdate(){
     // console.log(`cityInput: ${city}`);
     return city;
 }
+
+function getCurrentWeather(city){
+
+}
+function getUVIndex(city){
+    
+}
 function getForecast(city){
     // api.openweathermap.org/data/2.5/forecast?q={city name},{country code}
     var countryCode = "840"; // United States (get the proper country code)(search cities api)
@@ -88,25 +80,50 @@ function getForecast(city){
         url: queryURL,
         method: "GET"
       }).then(function(response){
-        console.log(response)
-        // city.city.id, name, coord.lat, lon, country, population, timezone, sunrise, sunset 
-        // city.list[0, 39]
-        var foreCastArr = response.list;
+        console.log("Here is the AJAX response:\n");
+        console.log(response);
+        var foreCastArr = response.list; // Get rid of the first index?
+        var days = {};
         foreCastArr.forEach(function(hourly3Report){
-            console.log(hourly3Report.dt_txt); //it works
-            // Getting the high and low for the day
-            //.dt 
-            //.main.temp
-            //.temp_min
-            //.temp_max
-            //.humidity
-            //.weather.icon
-            //.wind.speed,
-            //.dt_txt "2019-12-29 21:00:00"
+            var hourlyInfo = weatherObj(hourly3Report);
+            // console.log(hourlyInfo);
+            var day = hourlyInfo.timeData.day;
+            var hour = hourlyInfo.timeData.hour;
+            if ( days[day] ){
+                //push information to the day
+                days[day][hour] = hourlyInfo.weatherData;
+                console.log("Already have the day.")
+            } else {
+                days[day] = {};
+                days[day][hour] = hourlyInfo.weatherData;
+            }
         });
+        console.log(days);
         return console.log("BRO");
         // Moment.js incorporate
       });
+}
+
+// looks like my weather call doesn't grab the current day's weather
+function weatherObj(reportObj){
+    var fcMoment = moment(reportObj.dt_txt);
+    // Object with 2 nested objects containing time and weather data
+    forecastData = {
+        timeData : {
+            day : fcMoment.format("dddd"),
+            dayOfMonth : fcMoment.format("DD"),
+            hour : fcMoment.format("hA"),
+        },
+        weatherData : {
+            temp : reportObj.main.temp,
+            temp_min : reportObj.main.temp_min,
+            temp_max : reportObj.main.temp_max,
+            humidity : reportObj.main.humidity,
+            weatherIcon : `http://openweathermap.org/img/wn/${reportObj.weather[0].icon}@2x.png`,
+            windSpeed : reportObj.wind.speed,
+        },
+    };
+    return forecastData;
 }
 
 
@@ -114,8 +131,14 @@ init();
 
 
 
+// !!!!TO DO!!!!
 
+    // Function: Display the weather param1(where the user currently is)
+        // Going to have the current day as the focus
+        // The next 6 days will show up to the right
 
+    // Get stored searched cities.
+        // Need to look at localStorage
 
 
     // function displayStates(state){
