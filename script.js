@@ -238,22 +238,24 @@ function createCard(object){
     var cardBody = $(`<div class="card-body" id="${object.timeData.day}"></div>`);
     if (object.html.type === "focus"){
         // var row0 = $(``);
+        var row0 = $(`<h3 id="${object.timeData.day}">${object.timeData.fullDate}</h3>`);
         var row1 = $(`<h5 class="card-title tempDisp" id="${object.timeData.day}">${object.weatherData.weatherIcon}${object.weatherData.temp}°F</h5>`);
         var row2 = $(`<p class="card-text humidityDisp" id="${object.timeData.day}">Humidity: ${object.weatherData.humidity}%</p>`);
         var row3 = $(`<p class="card-text windDisp" id="${object.timeData.day}">Wind Speed: ${object.weatherData.windSpeed}m/h</p>`);
         var row4 = $(`<p class="card-text uvIndexDisp" id="${object.timeData.day}">UV Index: ${object.weatherData.uvIndex}</p>`); // This doesn't always arrive in time
     } else if (object.html.type === "forecast") {
         // var row0 = $(``);
-        var row1 = $(`<p class="card-title text-center tempDisp" id="${object.timeData.day}">${object.weatherData.weatherIcon}${object.weatherData.temp}°F</p>`);
-        var row2 = $(`<p class="card-text text-center humidityDisp" id="${object.timeData.day}">Humidity: ${object.weatherData.humidity}%</p>`);
-        var row3 = $(`<p class="card-text text-center dateDisp" id="${object.timeData.day}">Date: ${object.timeData.day} ${object.timeData.month}</p>`);
-        var row4 = $(`<div></div>`);
+        var row0 = $(`<h5 class="card-text text-center date mb-0" id="${object.timeData.day}">Date:</h5>`);
+        var row1 = $(`<p class="card-text text-center dateDisp mb-0" id="${object.timeData.day}">${object.timeData.shortday} ${object.timeData.dayOfMonth}</p>`);
+        var row2 = $(`<div></div>`);
+        var row3 = $(`<p class="card-title text-center tempDisp" id="${object.timeData.day}">${object.weatherData.weatherIcon}${object.weatherData.temp}°F</p>`);
+        var row4 = $(`<p class="card-text text-center humidityDisp" id="${object.timeData.day}">RH: ${object.weatherData.humidity}%</p>`);
     };
     // Appending to page
     // $(object.html.appendTo).empty();
     $(column).append(cardWrapper);
     $(cardWrapper).append(cardBody);
-    // $(cardBody).append(row0);
+    $(cardBody).append(row0);
     $(cardBody).append(row1);
     $(cardBody).append(row2);
     $(cardBody).append(row3);
@@ -268,6 +270,7 @@ function weatherObj(reportObj){
             fullDate: fcMoment.format("LLLL"),
             month: fcMoment.format("MMM"),
             dayOfMonth : fcMoment.format("DD"),
+            shortday : fcMoment.format("ddd"),
             day : fcMoment.format("dddd"),
             hour : fcMoment.format("hA"),
         },
