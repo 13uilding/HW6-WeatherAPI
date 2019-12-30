@@ -211,8 +211,8 @@ function getForecast(city, countryCode){
                 // This changes the data of the last useable timeslot so that Will need to be fixed if I want to display graphs in the future
                 // I could create 
                 var remaining5Card = currentDay[currentDay.useableTime];
-                remaining5Card.weatherData.temp = tempAvg.round();
-                remaining5Card.weatherData.humidity = humidityAvg.round();
+                remaining5Card.weatherData.temp = Math.round(tempAvg);
+                remaining5Card.weatherData.humidity = Math.round(humidityAvg);
                 // // remaining5Card.weatherData. = Avg;
                 createCard(remaining5Card);
             };
@@ -233,27 +233,32 @@ function createCard(object){
     console.log(`CreateCard Object:`);
     console.log(object);
     // I'm concerned of having two ids the same
-    var cardWrapper = $(`<div class="card w-${object.html.width}" id=${object.timeData.fullDate}></div>`);
-    var cardBody = $(`<div class="card-body" id=${object.timeData.fullDate}></div>`);
-    var row1 = $(`<h5 class="card-title tempDisp" id=${object.timeData.fullDate}>${object.weatherData.weatherIcon}${object.weatherData.temp}°F</h5>`);
-    var row2 = $(`<p class="card-text humidityDisp" id=${object.timeData.fullDate}>Humidity: ${object.weatherData.humidity}%</p>`);
+    var column = $(`<div class="col mb-2"></div>`);
+    var cardWrapper = $(`<div class="card w-${object.html.width}" id="${object.timeData.day}"></div>`);
+    var cardBody = $(`<div class="card-body" id="${object.timeData.day}"></div>`);
     if (object.html.type === "focus"){
-        var row3 = $(`<p class="card-text windDisp" id=${object.timeData.fullDate}>Wind Speed: ${object.weatherData.windSpeed}m/h</p>`);
-        var row4 = $(`<p class="card-text uvIndexDisp" id=${object.timeData.fullDate}>UV Index: ${object.weatherData.uvIndex}</p>`); // This doesn't always arrive in time
+        // var row0 = $(``);
+        var row1 = $(`<h5 class="card-title tempDisp" id="${object.timeData.day}">${object.weatherData.weatherIcon}${object.weatherData.temp}°F</h5>`);
+        var row2 = $(`<p class="card-text humidityDisp" id="${object.timeData.day}">Humidity: ${object.weatherData.humidity}%</p>`);
+        var row3 = $(`<p class="card-text windDisp" id="${object.timeData.day}">Wind Speed: ${object.weatherData.windSpeed}m/h</p>`);
+        var row4 = $(`<p class="card-text uvIndexDisp" id="${object.timeData.day}">UV Index: ${object.weatherData.uvIndex}</p>`); // This doesn't always arrive in time
     } else if (object.html.type === "forecast") {
-        var row3 = $(`<h5 class="card-text dateDisp" id=${object.timeData.fullDate}>Date: ${object.timeData.day} ${object.timeData.month}</h5>`);
-        var row4 = $(`<div class="mb-1"></div>`);
+        // var row0 = $(``);
+        var row1 = $(`<p class="card-title text-center tempDisp" id="${object.timeData.day}">${object.weatherData.weatherIcon}${object.weatherData.temp}°F</p>`);
+        var row2 = $(`<p class="card-text text-center humidityDisp" id="${object.timeData.day}">Humidity: ${object.weatherData.humidity}%</p>`);
+        var row3 = $(`<p class="card-text text-center dateDisp" id="${object.timeData.day}">Date: ${object.timeData.day} ${object.timeData.month}</p>`);
+        var row4 = $(`<div></div>`);
     };
     // Appending to page
     // $(object.html.appendTo).empty();
+    $(column).append(cardWrapper);
     $(cardWrapper).append(cardBody);
+    // $(cardBody).append(row0);
     $(cardBody).append(row1);
     $(cardBody).append(row2);
     $(cardBody).append(row3);
     $(cardBody).append(row4);
-    $(object.html.appendTo).append(cardWrapper);
-
-
+    $(object.html.appendTo).append(column);
 }
 function weatherObj(reportObj){
     var fcMoment = moment(reportObj.dt_txt);
