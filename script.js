@@ -238,7 +238,8 @@ function createCard(object){
     var cardBody = $(`<div class="card-body" id="${object.timeData.day}"></div>`);
     if (object.html.type === "focus"){
         // var row0 = $(``);
-        var row0 = $(`<h3 id="${object.timeData.day}">${object.timeData.fullDate}</h3>`);
+        var row0 = $(`<h3 id="${object.timeData.day}">${object.location.city}, ${object.location.country}</h3>\n<h3>${object.timeData.fullDate}</h3>`);
+        // var row0 = $(`<h3 id="${object.timeData.day}">${object.timeData.fullDate}</h3>`);
         var row1 = $(`<h5 class="card-title tempDisp" id="${object.timeData.day}">${object.weatherData.weatherIcon}${object.weatherData.temp}°F</h5>`);
         var row2 = $(`<p class="card-text humidityDisp" id="${object.timeData.day}">Humidity: ${object.weatherData.humidity}%</p>`);
         var row3 = $(`<p class="card-text windDisp" id="${object.timeData.day}">Wind Speed: ${object.weatherData.windSpeed}m/h</p>`);
@@ -247,8 +248,8 @@ function createCard(object){
         // var row0 = $(``);
         var row0 = $(`<h5 class="card-text text-center date mb-0" id="${object.timeData.day}">Date:</h5>`);
         var row1 = $(`<p class="card-text text-center dateDisp mb-0" id="${object.timeData.day}">${object.timeData.shortday} ${object.timeData.dayOfMonth}</p>`);
-        var row2 = $(`<div></div>`);
-        var row3 = $(`<p class="card-title text-center tempDisp" id="${object.timeData.day}">${object.weatherData.weatherIcon}${object.weatherData.temp}°F</p>`);
+        var row2 = $(`<p class="card-title text-center iconDisp" id="${object.timeData.day}">${object.weatherData.weatherIcon}</p>`);
+        var row3 = $(`<p class="card-text text-center tempDisp" id="${object.timeData.day}">Temp: ${object.weatherData.temp}°F</p>`);
         var row4 = $(`<p class="card-text text-center humidityDisp" id="${object.timeData.day}">RH: ${object.weatherData.humidity}%</p>`);
     };
     // Appending to page

@@ -16,15 +16,15 @@
   <link rel="stylesheet" type="text/css" href="style.css">
 </head>
 <body class="bg-light">
-    <div class="container bg-light">
+    <div class="container bg-light"> 
         <div class="row">
             <div class="col text-center bg-info">
                 <h1>Weather Dashboard</h1>
                 <h3 class="currentlyDisplaying text-white" data-location="current-location">City, Country</h3>
             </div>
         </div>
-        <div class="row">
-            <div class="col-4-md citiesField">
+        <div class="row row-cols-1 row-cols-sm-2"> 
+            <div class="col-4-sm citiesField" >
                 <form class="cityForm">
                     <label for="cityInput">City Search Field</label>
                     <input type="text" class="form-control" id="cityInput" placeholder="City, Country Code">
@@ -36,11 +36,11 @@
                 <!-- <button type="button" class="btn btn-outline-success">Success</button> -->
             </div>
             <div class="col forecastField">
-                <div class="row focusDay">
+                <div class="row focusDay" style="background-color: rgb(187, 255, 252)">
                     <!-- <div class="col-12 focusDay"> -->
                     <!-- </div> -->
                 </div>
-                <div class="row row-cols-2 row-cols-md-5 remaining5Days">
+                <div class="row row-cols-2 row-cols-lg-5 remaining5Days" style="background-color: rgb(187, 255, 252)">
                     <!-- <div class="col remaining5Days">
                     </div> -->
                 </div>
