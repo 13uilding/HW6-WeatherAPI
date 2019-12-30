@@ -4,6 +4,8 @@ var cityStr;
 var cities = [];
 var uvIndex;
 var currentWeatherObj;
+var lat;
+var lon;
 
 // TARGETS
 var currentlyDisplayingHeader = $("h3.currentlyDisplaying");
@@ -52,6 +54,7 @@ $(".citiesList").on("click", "button", function( event ){
 // FUNCTIONS
 //FIX
 function init(){
+    // alert("Search only cities");
     renderButtons(cities);
 };  
 //FIX
@@ -103,6 +106,8 @@ function getCurrentWeather(city, countryCode){
         var lat = response.coord.lat;
         var lon = response.coord.lon;
         var countryCode = response.sys.country;
+        var city = response.name;
+        var id = response.id;
         // Getting the UV index
         var uvIndex = getUVIndex(lat, lon);
         // Modifying the weather object
@@ -116,10 +121,15 @@ function getCurrentWeather(city, countryCode){
             lon: lon,
             lat: lat,
             country: countryCode,
+            city: city,
+            id: id,
         };
+        currentlyDisplayingHeader.text(`${city}, ${countryCode}`)
         
+        $(".focusDay").empty();
         createCard(currentWeatherObj);
-        console.log("done making the card");
+        console.log("Current Weather Response:");
+        console.log(response);
 
       });
 }
@@ -132,26 +142,86 @@ function getForecast(city, countryCode){
         url: queryURL,
         method: "GET"
       }).then(function(response){
-        var foreCastArr = response.list; 
+        // Initialize
+        var timeArr = ["12AM", "3AM", "6AM", "9AM", "12PM", "3PM", "6PM", "9PM"];
         var days = {};
+        var foreCastArr = response.list; 
+        // Grab all of the hourly reports and store 
         foreCastArr.forEach(function(hourlyReport){
             var hourlyInfo = weatherObj(hourlyReport);
             // console.log(hourlyInfo);
             var day = hourlyInfo.timeData.day;
             var hour = hourlyInfo.timeData.hour;
             if ( days[day] ){
-                //push information to the day
-                days[day][hour] = hourlyInfo.weatherData;
+                // // Push information to the day
+                // days[day][hour] = hourlyInfo.weatherData;
+                days[day][hour] = hourlyInfo
             } else {
+                // Create the day
                 days[day] = {};
-                days[day][hour] = hourlyInfo.weatherData;
+                // days[day][hour] = hourlyInfo.weatherData;
+                days[day][hour] = hourlyInfo;
             }
         });
-        days.forEach(function(day){
-            
-            createCard(currentWeatherObj);
-        })
-        console.log("done making the card");
+        console.log("Forecast Days:");
+        console.log(days);
+        $(".remaining5Days").empty();
+        for (let day in days){
+            console.log(day);
+            if(days.hasOwnProperty(day)){
+                // console.log(days[day]);
+                var tempAvg = 0;
+                var humidityAvg = 0;
+                var iconImageMode = 0
+                var count = 0;
+                var iconImageObj = {};
+                var currentDay = days[day];
+                
+                timeArr.forEach(function(hour){
+                    if (currentDay[hour] !== undefined){
+                        // console.log(currentDay[hour]);
+                        currentDay.useableTime = hour;
+                        // console.log(currentDay.useableTime);
+                        tempAvg += currentDay[hour].weatherData.temp;
+                        humidityAvg += currentDay[hour].weatherData.humidity;
+                        if (iconImageObj.hasOwnProperty(currentDay[hour].weatherData.weatherIcon)){
+                            iconImageObj[currentDay[hour].weatherData.weatherIcon] += 1;
+                        } else {
+                            iconImageObj[currentDay[hour].weatherData.weatherIcon] = 0;
+                        };
+                        count++;
+                    }
+                });
+
+                // After
+                tempAvg /= count;
+                humidityAvg /= count;
+                iconImageMode = Object.values(iconImageObj).reduce((a, b) => a > b ? a : b);
+
+                // console.log(foreCastArr);
+                // var dailyInfo = weatherObj(foreCastArr[]); // index of the proper days
+
+                console.log(currentDay[currentDay.useableTime]);
+                // console.log(`Day: ${day} Values:`)
+                // console.log(iconImageMode);
+                // console.log(tempAvg);
+                // console.log(humidityAvg);
+
+                
+                // This changes the data of the last useable timeslot so that Will need to be fixed if I want to display graphs in the future
+                // I could create 
+                var remaining5Card = currentDay[currentDay.useableTime];
+                remaining5Card.weatherData.temp = tempAvg.round();
+                remaining5Card.weatherData.humidity = humidityAvg.round();
+                // // remaining5Card.weatherData. = Avg;
+                createCard(remaining5Card);
+            };
+        };
+        // days.keys.forEach(function(day){
+        //     console.log(day);
+        //     // createCard(currentWeatherObj);
+        // })
+        // console.log("done making the card");
         // Get rid of current day's forecast
         // console.log(days.keys);
         // This is where I need to create cards with the days
@@ -160,6 +230,7 @@ function getForecast(city, countryCode){
       });
 }
 function createCard(object){
+    console.log(`CreateCard Object:`);
     console.log(object);
     // I'm concerned of having two ids the same
     var cardWrapper = $(`<div class="card w-${object.html.width}" id=${object.timeData.fullDate}></div>`);
@@ -174,13 +245,13 @@ function createCard(object){
         var row4 = $(`<div class="mb-1"></div>`);
     };
     // Appending to page
-    $(object.html.appendTo).empty();
-    $(object.html.appendTo).append(cardWrapper);
+    // $(object.html.appendTo).empty();
     $(cardWrapper).append(cardBody);
     $(cardBody).append(row1);
     $(cardBody).append(row2);
     $(cardBody).append(row3);
     $(cardBody).append(row4);
+    $(object.html.appendTo).append(cardWrapper);
 
 
 }
@@ -227,8 +298,8 @@ function getUVIndex(lat, lon){
 
 init();
 
-//°
 
+//°
 // !!!!TO DO!!!!
 
     // Function: Display the weather param1(where the user currently is)
