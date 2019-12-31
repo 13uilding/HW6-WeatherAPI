@@ -17,30 +17,30 @@ var clearBtn = $("#clearBtn");
 var APIKey = "8b1406f6dfd91995f05edf59eb9d8b9c";
 
 // ++++BUTTONS++++
+// Click Search: Calls getCity() and getWeatherAPIs()
 searchBtn.on("click", function(event){
     event.preventDefault();
     var medium = "form";
     // getCity Returns the form's input as ["City Title Case", "CC"]
     var location = getCity(cityInput, medium);
     getWeatherAPIs(location);
-    renderButtons(cities);
 })
+// Clears input
 clearBtn.on("click", function(event){
     event.preventDefault();
     cityInput.val("");
 })
 // ++++EVENTS++++
-// Clear btn btn event delegation. Prevent bubbling
-//
+// Submit Functionality: Calls getCity() and getWeatherAPIs()
 $(".cityForm").on("submit", function(event){
     event.preventDefault();
     var medium = "form";
     // getCity Returns the form's input as ["City Title Case", "CC"]
     var location = getCity(cityInput, medium);
     getWeatherAPIs(location);
-    renderButtons(cities);
 });
-//FIX THIS BOYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYY
+// POSSIBLY ADD: Clear btn btn event delegation. Prevent bubbling
+// Event Delegation for all the city buttons: Calls getWeatherAPIs() if current city doesn't equal button pushed
 $(".citiesList").on("click", "button", function( event ){
     event.preventDefault();
     var city = $(this).text();
@@ -55,8 +55,8 @@ $(".citiesList").on("click", "button", function( event ){
 })
 
 
-// FUNCTIONS
-//FIX
+// ++++FUNCTIONS++++
+// Calls getLocalStorage() and renderButtons()
 function init(){
     // alert("Search only cities");
     // Local Storage
@@ -200,13 +200,14 @@ function getForecast(city, countryCode){
         });
         $(".remaining5Days").empty();
         for (let day in days){
-            if ($(`.w-100`).attr("data-day") === day){
+            // Removes the current day from the forecast
+            if (day === $(`.w-100`).attr("data-day")){
                 continue;
             }
-            // Possibly do the extra-day elimination here Or inside the foreCastArr.forEach block
-            // if (day === $(`.card .w-100`)["data-day"]){
-            //     continue;
-            // }
+            // Removes day 6 from the forecast
+            if (day === moment().add(6, 'days').format("dddd")){
+                continue;
+            }
             if(days.hasOwnProperty(day)){
                 var tempAvg = 0;
                 var humidityAvg = 0;
