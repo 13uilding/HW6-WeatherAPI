@@ -2,10 +2,10 @@
 var queryURL;
 var cityStr;
 var cities = [];
-var uvIndex;
-var currentWeatherObj;
-var lat;
-var lon;
+var uvIndex; // Prevents the page from being loaded if the UV hasn't been grabbed
+// var currentWeatherObj;
+// var lat;
+// var lon;
 
 // TARGETS
 var currentlyDisplayingHeader = $("h3.currentlyDisplaying");
@@ -19,48 +19,63 @@ var clearBtn = $("#clearBtn");
 var APIKey = "8b1406f6dfd91995f05edf59eb9d8b9c";
 
 // ++++BUTTONS++++
-//FIX
 searchBtn.on("click", function(event){
     event.preventDefault();
-    console.log("fix me: Make a single function to handle this and submit event")
-
-
+    var medium = "form";
+    // cityUpdate Returns the form's input as ["City Title Case", "CC"]
+    var location = cityUpdate(cityInput, medium);
+    getWeatherAPIs(location);
+    renderButtons(cities);
 })
 clearBtn.on("click", function(event){
     event.preventDefault();
     cityInput.val("");
 })
-
 // ++++EVENTS++++
-//FIX
+// Clear btn btn event delegation. Prevent bubbling
+//
 $(".cityForm").on("submit", function(event){
     event.preventDefault();
-    var location = cityUpdate();
-    var city = location[0];
-    var countryCode = location[1];
-    getCurrentWeather(city, countryCode);
-    getForecast(city, countryCode);
-    renderButtons(cities); // Will move this out of here. Want to make sure the call was a success first
-
+    var medium = "form";
+    // cityUpdate Returns the form's input as ["City Title Case", "CC"]
+    var location = cityUpdate(cityInput, medium);
+    getWeatherAPIs(location);
+    renderButtons(cities);
 });
 //FIX
 $(".citiesList").on("click", "button", function( event ){
     event.preventDefault();
     var city = $(this).text();
-    console.log( $(this).text() );
+    var medium = "button";
+    if (currentlyDisplayingHeader.text() === city){
+        return;
+    } else {
+        var location = cityUpdate(city, medium);
+        getWeatherAPIs(location);
+        renderButtons(cities);
+    }
+
 })
 
 
 // FUNCTIONS
+function getWeatherAPIs(location){
+    var city = location[0];
+    var countryCode = location[1];
+    getCurrentWeather(city, countryCode);
+    getForecast(city, countryCode);
+};
 //FIX
 function init(){
     // alert("Search only cities");
+    // Local Storage
     renderButtons(cities);
 };  
 //FIX
 function renderButtons(arr){
     citiesList.empty();
     arr.forEach(function(city){
+        // if ($(`.cityBtn`)) // Grab the data name
         // Make a button inside this button to erase the local storage and the button from the html. Prevent bubbling
         var cityBtn = $(`<button type="button" class="btn btn-outline-success cityBtn mb-1" data-name="${city}">${city}</button>`);
         citiesList.prepend(cityBtn);
@@ -75,22 +90,29 @@ function toTitleCase(wordsArr){
     })
     return wordsTC.join(" ");
 }
-function cityUpdate(){
+// Takes the input from the form, returns the result 
+function cityUpdate(cityInput, medium){
     // User error. DK example
-    var location = cityInput.val().trim().split(", ");
-    // Title Case
+    if (medium === "form"){
+        var location = cityInput.val().trim().split(", ");    
+        cityInput.val("");
+    } else {
+        var location = cityInput.trim().split(", ");
+    }
     var city = location[0].split(" ");
+    // Title Case
     var cityTitleCase = toTitleCase(city)
+    // Assumes US if nothing else is selected 
     if ( location[1] !== undefined){
         var country = location[1].toUpperCase();
-    } else {
-        var country = "US"
-    }
-    cityInput.val("");
+    } else var country = "US";
+    // I shouldn't PUSH UNTIL I KNOW THIS GETS A PROPER LOCATION
+    // Possibly move this
     cities.push(`${cityTitleCase}, ${country}`);
     var result = [cityTitleCase, country]
     return result;
 }
+// AJAX openWeatherAPI call for weather and uv-index, and then createCard()
 function getCurrentWeather(city, countryCode){
     // api.openweathermap.org/data/2.5/forecast?q={city name},{country code}
     // United States (get the proper country code)(search cities api)
@@ -128,15 +150,17 @@ function getCurrentWeather(city, countryCode){
         
         $(".focusDay").empty();
         createCard(currentWeatherObj);
-        console.log("Current Weather Response:");
-        console.log(response);
+        // console.log("Current Weather Response:");
+        // console.log(response);
 
       });
 }
+//! REFACTOR ME PLEASE
+// AJAX openWeatherAPI call for forecast, and parses the the information into day objects with 3-hourly weather data
+// Loops through the days and hours to:
+// Finds the average temperature/humidity
+// Then calls createCard()
 function getForecast(city, countryCode){
-    // api.openweathermap.org/data/2.5/forecast?q={city name},{country code}
-    // United States (get the proper country code)(search cities api?)
-    // Need to add that functionality
     var queryURL = `https://api.openweathermap.org/data/2.5/forecast?q=${city},${countryCode}&APPID=${APIKey}&units=Imperial`;
     $.ajax({
         url: queryURL,
@@ -146,49 +170,47 @@ function getForecast(city, countryCode){
         var timeArr = ["12AM", "3AM", "6AM", "9AM", "12PM", "3PM", "6PM", "9PM"];
         var days = {};
         var foreCastArr = response.list; 
-        // Grab all of the hourly reports and store 
+        // Push dayObj to the days object. Days acquire data for each 3hr increment
+        // Have a console.log(inside)
         foreCastArr.forEach(function(hourlyReport){
             var hourlyInfo = weatherObj(hourlyReport);
-            // console.log(hourlyInfo);
+            console.log(hourlyInfo);
             var day = hourlyInfo.timeData.day;
             var hour = hourlyInfo.timeData.hour;
             if ( days[day] ){
-                // // Push information to the day
-                // days[day][hour] = hourlyInfo.weatherData;
+                // Push information to the day
                 days[day][hour] = hourlyInfo
             } else {
                 // Create the day
                 days[day] = {};
-                // days[day][hour] = hourlyInfo.weatherData;
                 days[day][hour] = hourlyInfo;
             }
         });
-        console.log("Forecast Days:");
+        console.log("Forecast Days Array:");
         console.log(days);
         $(".remaining5Days").empty();
         for (let day in days){
             console.log(day);
+            // Possibly do the extra-day elimination here Or inside the foreCastArr.forEach block
             if(days.hasOwnProperty(day)){
-                // console.log(days[day]);
                 var tempAvg = 0;
                 var humidityAvg = 0;
-                var iconImageMode = 0
+                var iconImageMode = 0;
                 var count = 0;
                 var iconImageObj = {};
                 var currentDay = days[day];
                 
                 timeArr.forEach(function(hour){
                     if (currentDay[hour] !== undefined){
-                        // console.log(currentDay[hour]);
                         currentDay.useableTime = hour;
-                        // console.log(currentDay.useableTime);
                         tempAvg += currentDay[hour].weatherData.temp;
                         humidityAvg += currentDay[hour].weatherData.humidity;
-                        if (iconImageObj.hasOwnProperty(currentDay[hour].weatherData.weatherIcon)){
-                            iconImageObj[currentDay[hour].weatherData.weatherIcon] += 1;
-                        } else {
-                            iconImageObj[currentDay[hour].weatherData.weatherIcon] = 0;
-                        };
+                        //!Under construction. Need to make sure weather.data.weatherDescription is a thing
+                        // if (iconImageObj.hasOwnProperty(currentDay[hour].weatherData.weatherDescription)){
+                        //     iconImageObj[currentDay[hour].weatherData.weatherDescription] += 1;
+                        // } else {
+                        //     iconImageObj[currentDay[hour].weatherData.weatherDescription] = 0;
+                        // };
                         count++;
                     }
                 });
@@ -196,23 +218,22 @@ function getForecast(city, countryCode){
                 // After
                 tempAvg /= count;
                 humidityAvg /= count;
-                iconImageMode = Object.values(iconImageObj).reduce((a, b) => a > b ? a : b);
-
-                // console.log(foreCastArr);
-                // var dailyInfo = weatherObj(foreCastArr[]); // index of the proper days
-
-                console.log(currentDay[currentDay.useableTime]);
-                // console.log(`Day: ${day} Values:`)
-                // console.log(iconImageMode);
-                // console.log(tempAvg);
-                // console.log(humidityAvg);
-
                 
-                // This changes the data of the last useable timeslot so that Will need to be fixed if I want to display graphs in the future
-                // I could create 
                 var remaining5Card = currentDay[currentDay.useableTime];
                 remaining5Card.weatherData.temp = Math.round(tempAvg);
                 remaining5Card.weatherData.humidity = Math.round(humidityAvg);
+                
+                //!Under Construction
+                                // iconImageMode = Object.values(iconImageObj).reduce((a, b) => a > b ? a : b);
+                                // var iconKey = findKeyFromValue(iconImageObj, iconImageMode); // This name sucks but I can't think of a better one    
+                                // That is a angry bald bearded man, which adequately represent my frustration------------------->   ( >:( ]}
+                                // console.log("Icon Key: " + iconKey);
+                                // console.log(foreCastArr);
+                                // var dailyInfo = weatherObj(foreCastArr[]); // index of the proper days
+                                // console.log(currentDay[currentDay.useableTime]);
+                                // remaining5Card.weatherData.weatherIcon = iconKey;
+                                // console.log("weatherData.icon" + remaining5Card.weatherData.icon); UNDEFINED
+
                 // // remaining5Card.weatherData. = Avg;
                 createCard(remaining5Card);
             };
@@ -221,14 +242,22 @@ function getForecast(city, countryCode){
         //     console.log(day);
         //     // createCard(currentWeatherObj);
         // })
-        // console.log("done making the card");
         // Get rid of current day's forecast
-        // console.log(days.keys);
         // This is where I need to create cards with the days
-        // console.log(days);
 
       });
 }
+// Confirm this works before resolving the forecast iconImage
+function findKeyFromValue(obj, value){
+    Object.keys(obj).forEach(function(key){
+        if (parseInt(obj[key]) === parseInt(value)){
+            return key;
+        };
+    });
+    var result = "No key corresponds to that value."
+    return result;
+};
+
 function createCard(object){
     console.log(`CreateCard Object:`);
     console.log(object);
@@ -238,9 +267,9 @@ function createCard(object){
     var cardBody = $(`<div class="card-body" id="${object.timeData.day}"></div>`);
     if (object.html.type === "focus"){
         // var row0 = $(``);
-        var row0 = $(`<h3 id="${object.timeData.day}">${object.location.city}, ${object.location.country}</h3>\n<h3>${object.timeData.fullDate}</h3>`);
+        var row0 = $(`<h3 id="${object.timeData.day}">Current Weather in ${object.location.city}, ${object.location.country}</h3>\n<h3>${object.timeData.fullDate}</h3>`);
         // var row0 = $(`<h3 id="${object.timeData.day}">${object.timeData.fullDate}</h3>`);
-        var row1 = $(`<h5 class="card-title tempDisp" id="${object.timeData.day}">${object.weatherData.weatherIcon}${object.weatherData.temp}°F</h5>`);
+        var row1 = $(`<h5 class="card-title tempDisp" id="${object.timeData.day}">${object.weatherData.weatherIcon}${Math.round(object.weatherData.temp)}°F</h5>`);
         var row2 = $(`<p class="card-text humidityDisp" id="${object.timeData.day}">Humidity: ${object.weatherData.humidity}%</p>`);
         var row3 = $(`<p class="card-text windDisp" id="${object.timeData.day}">Wind Speed: ${object.weatherData.windSpeed}m/h</p>`);
         var row4 = $(`<p class="card-text uvIndexDisp" id="${object.timeData.day}">UV Index: ${object.weatherData.uvIndex}</p>`); // This doesn't always arrive in time
@@ -248,9 +277,9 @@ function createCard(object){
         // var row0 = $(``);
         var row0 = $(`<h5 class="card-text text-center date mb-0" id="${object.timeData.day}">Date:</h5>`);
         var row1 = $(`<p class="card-text text-center dateDisp mb-0" id="${object.timeData.day}">${object.timeData.shortday} ${object.timeData.dayOfMonth}</p>`);
-        var row2 = $(`<p class="card-title text-center iconDisp" id="${object.timeData.day}">${object.weatherData.weatherIcon}</p>`);
-        var row3 = $(`<p class="card-text text-center tempDisp" id="${object.timeData.day}">Temp: ${object.weatherData.temp}°F</p>`);
-        var row4 = $(`<p class="card-text text-center humidityDisp" id="${object.timeData.day}">RH: ${object.weatherData.humidity}%</p>`);
+        var row2 = $(`<p class="card-title text-center iconDisp mb-0" id="${object.timeData.day}">${object.weatherData.weatherIcon}</p>`);
+        var row3 = $(`<p class="card-text text-center tempDisp mb-0" id="${object.timeData.day}">Temp: ${object.weatherData.temp}°F</p>`);
+        var row4 = $(`<p class="card-text text-center humidityDisp mb-0" id="${object.timeData.day}">RH: ${object.weatherData.humidity}%</p>`);
     };
     // Appending to page
     // $(object.html.appendTo).empty();
@@ -281,6 +310,7 @@ function weatherObj(reportObj){
             temp_max : reportObj.main.temp_max,
             humidity : reportObj.main.humidity,
             weatherIcon : `<img src="https://openweathermap.org/img/wn/${reportObj.weather[0].icon}@2x.png" />`,
+            weatherDescription: reportObj.weather.description,
             windSpeed : reportObj.wind.speed,
         },
         html : {
@@ -297,9 +327,9 @@ function getUVIndex(lat, lon){
         url: queryURL,
         method: "GET"
     }).then(function(response){
-        // console.log(response.value);
         uvIndex = response.value;
-        console.log(uvIndex);
+        $(`.uvIndexDisp`).text("UV Index: " + uvIndex); 
+
     })
     return uvIndex;
 }
