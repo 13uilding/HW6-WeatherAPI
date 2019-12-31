@@ -62,6 +62,8 @@ function init(){
     // Local Storage
     getLocalStorage();
     renderButtons(cities);
+    var location = getCity(cities[cities.length-1], "init");
+    getWeatherAPIs(location);
 };  
 // Data Storage
 function getLocalStorage(){
@@ -161,6 +163,10 @@ function getCurrentWeather(city, countryCode){
         // I shouldn't PUSH UNTIL I KNOW THIS GETS A PROPER LOCATION, but I'm going to do it for now
         if (!cities.includes(cityFormatted)){
             cities.push(cityFormatted);
+            renderButtons(cities);
+        } else {
+            var movingCity = cities.splice(cities.indexOf(cityFormatted), 1);
+            cities.push(...movingCity);
             renderButtons(cities);
         };
         setLocalStorage(cityFormatted, currentWeatherObj.location);
@@ -353,23 +359,3 @@ function weatherObj(reportObj){
 
 init();
 
-
-//°
-// !!!!TO DO!!!!
-
-    // Function: Display the weather param1(where the user currently is)
-        // Going to have the current day as the focus
-        // The next 6 days will show up to the right
-
-    // Get stored searched cities.
-        // Need to look at localStorage
-
-
-    // function displayStates(state){
-//     switch(state){
-//         case "loading":
-//             console.log("Data hasn't loaded yet, so what should I display?");
-//             break;
-        
-//     }
-// }
