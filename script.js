@@ -200,6 +200,9 @@ function getForecast(city, countryCode){
         });
         $(".remaining5Days").empty();
         for (let day in days){
+            if ($(`.w-100`).attr("data-day") === day){
+                continue;
+            }
             // Possibly do the extra-day elimination here Or inside the foreCastArr.forEach block
             // if (day === $(`.card .w-100`)["data-day"]){
             //     continue;
