@@ -65,6 +65,9 @@ function init(){
     var location = getCity(cities[cities.length-1], "init");
     getWeatherAPIs(location);
 };  
+function failCallback(){
+    console.log("loading");
+};
 // Data Storage
 function getLocalStorage(){
     var fetchedCities = JSON.parse(localStorage.getItem("cities"));
@@ -172,7 +175,7 @@ function getCurrentWeather(city, countryCode){
         setLocalStorage(cityFormatted, currentWeatherObj.location);
         $(".focusDay").empty();
         createCard(currentWeatherObj);
-      });
+      }, failCallback());
 }
 //! REFACTOR ME PLEASE
 // AJAX openWeatherAPI call for forecast, and parses the the information into day objects with 3-hourly weather data
@@ -267,7 +270,7 @@ function getForecast(city, countryCode){
         // Get rid of current day's forecast
         // This is where I need to create cards with the days
 
-      });
+      }, failCallback());
 }
 // AJAX openWeatherAPI call for UVIndex
 function getUVIndex(lat, lon){
@@ -279,7 +282,7 @@ function getUVIndex(lat, lon){
         uvIndex = response.value;
         $(`.uvIndexDisp`).text("UV Index: " + uvIndex); 
 
-    })
+    }, failCallback());
     return uvIndex;
 }
 // Confirm this works before resolving the forecast iconImage
