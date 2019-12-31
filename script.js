@@ -8,8 +8,6 @@ var uvIndex; // Prevents the page from being loaded if the UV hasn't been grabbe
 // var lon;
 
 // TARGETS
-var currentlyDisplayingHeader = $("h3.currentlyDisplaying");
-// City
 var cityInput = $("#cityInput");
 var citiesField = $(".citiesField");
 var citiesList = $(".citiesList")
@@ -22,8 +20,8 @@ var APIKey = "8b1406f6dfd91995f05edf59eb9d8b9c";
 searchBtn.on("click", function(event){
     event.preventDefault();
     var medium = "form";
-    // cityUpdate Returns the form's input as ["City Title Case", "CC"]
-    var location = cityUpdate(cityInput, medium);
+    // getCity Returns the form's input as ["City Title Case", "CC"]
+    var location = getCity(cityInput, medium);
     getWeatherAPIs(location);
     renderButtons(cities);
 })
@@ -37,41 +35,48 @@ clearBtn.on("click", function(event){
 $(".cityForm").on("submit", function(event){
     event.preventDefault();
     var medium = "form";
-    // cityUpdate Returns the form's input as ["City Title Case", "CC"]
-    var location = cityUpdate(cityInput, medium);
+    // getCity Returns the form's input as ["City Title Case", "CC"]
+    var location = getCity(cityInput, medium);
     getWeatherAPIs(location);
     renderButtons(cities);
 });
-//FIX
+//FIX THIS BOYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYY
 $(".citiesList").on("click", "button", function( event ){
     event.preventDefault();
     var city = $(this).text();
     var medium = "button";
-    if (currentlyDisplayingHeader.text() === city){
+    if ($(`#cityBoy`).attr("data-city") === city){
         return;
     } else {
-        var location = cityUpdate(city, medium);
+        var location = getCity(city, medium);
         getWeatherAPIs(location);
-        renderButtons(cities);
     }
 
 })
 
 
 // FUNCTIONS
-function getWeatherAPIs(location){
-    var city = location[0];
-    var countryCode = location[1];
-    getCurrentWeather(city, countryCode);
-    getForecast(city, countryCode);
-};
 //FIX
 function init(){
     // alert("Search only cities");
     // Local Storage
+    getLocalStorage();
     renderButtons(cities);
 };  
-//FIX
+// Data Storage
+function getLocalStorage(){
+    var fetchedCities = JSON.parse(localStorage.getItem("cities"));
+    if(fetchedCities){
+        cities = fetchedCities;
+    };
+};
+// A function to put an element in local storage
+function setLocalStorage(key, obj){
+    var objStr = JSON.stringify(obj)
+    localStorage.setItem("cities", JSON.stringify(cities));
+    localStorage.setItem(key, objStr);
+};
+//FIX Add a button that will delete stored buttons
 function renderButtons(arr){
     citiesList.empty();
     arr.forEach(function(city){
@@ -80,7 +85,15 @@ function renderButtons(arr){
         var cityBtn = $(`<button type="button" class="btn btn-outline-success cityBtn mb-1" data-name="${city}">${city}</button>`);
         citiesList.prepend(cityBtn);
     });   
-}
+};
+// Given an input location, the function will call getCurrentWeather and getForecast
+function getWeatherAPIs(location){
+    var city = location[0];
+    var countryCode = location[1];
+    getCurrentWeather(city, countryCode);
+    getForecast(city, countryCode);
+};
+// Makes an array title cased
 function toTitleCase(wordsArr){
     var wordsTC = [];
     wordsArr.forEach(function(word){
@@ -91,24 +104,20 @@ function toTitleCase(wordsArr){
     return wordsTC.join(" ");
 }
 // Takes the input from the form, returns the result 
-function cityUpdate(cityInput, medium){
-    // User error. DK example
+function getCity(cityInput, medium){
     if (medium === "form"){
         var location = cityInput.val().trim().split(", ");    
         cityInput.val("");
+    // I COULD ADD AN ELSE IF HERE, AND MAKE A CASE IF i WANT TO DELETE A STORAGE
     } else {
         var location = cityInput.trim().split(", ");
     }
     var city = location[0].split(" ");
-    // Title Case
     var cityTitleCase = toTitleCase(city)
-    // Assumes US if nothing else is selected 
+    // Assumes US if no ", " provided
     if ( location[1] !== undefined){
         var country = location[1].toUpperCase();
     } else var country = "US";
-    // I shouldn't PUSH UNTIL I KNOW THIS GETS A PROPER LOCATION
-    // Possibly move this
-    cities.push(`${cityTitleCase}, ${country}`);
     var result = [cityTitleCase, country]
     return result;
 }
@@ -130,6 +139,7 @@ function getCurrentWeather(city, countryCode){
         var countryCode = response.sys.country;
         var city = response.name;
         var id = response.id;
+        var cityFormatted = `${city}, ${countryCode}`;
         // Getting the UV index
         var uvIndex = getUVIndex(lat, lon);
         // Modifying the weather object
@@ -146,13 +156,16 @@ function getCurrentWeather(city, countryCode){
             city: city,
             id: id,
         };
-        currentlyDisplayingHeader.text(`${city}, ${countryCode}`)
-        
+        // Changing the header
+        // Local Storage
+        // I shouldn't PUSH UNTIL I KNOW THIS GETS A PROPER LOCATION, but I'm going to do it for now
+        if (!cities.includes(cityFormatted)){
+            cities.push(cityFormatted);
+            renderButtons(cities);
+        };
+        setLocalStorage(cityFormatted, currentWeatherObj.location);
         $(".focusDay").empty();
         createCard(currentWeatherObj);
-        // console.log("Current Weather Response:");
-        // console.log(response);
-
       });
 }
 //! REFACTOR ME PLEASE
@@ -174,7 +187,6 @@ function getForecast(city, countryCode){
         // Have a console.log(inside)
         foreCastArr.forEach(function(hourlyReport){
             var hourlyInfo = weatherObj(hourlyReport);
-            console.log(hourlyInfo);
             var day = hourlyInfo.timeData.day;
             var hour = hourlyInfo.timeData.hour;
             if ( days[day] ){
@@ -186,12 +198,12 @@ function getForecast(city, countryCode){
                 days[day][hour] = hourlyInfo;
             }
         });
-        console.log("Forecast Days Array:");
-        console.log(days);
         $(".remaining5Days").empty();
         for (let day in days){
-            console.log(day);
             // Possibly do the extra-day elimination here Or inside the foreCastArr.forEach block
+            // if (day === $(`.card .w-100`)["data-day"]){
+            //     continue;
+            // }
             if(days.hasOwnProperty(day)){
                 var tempAvg = 0;
                 var humidityAvg = 0;
@@ -247,6 +259,19 @@ function getForecast(city, countryCode){
 
       });
 }
+// AJAX openWeatherAPI call for UVIndex
+function getUVIndex(lat, lon){
+    var queryURL = `http://api.openweathermap.org/data/2.5/uvi?appid=${APIKey}&lat=${lat}&lon=${lon}`;
+    $.ajax({
+        url: queryURL,
+        method: "GET"
+    }).then(function(response){
+        uvIndex = response.value;
+        $(`.uvIndexDisp`).text("UV Index: " + uvIndex); 
+
+    })
+    return uvIndex;
+}
 // Confirm this works before resolving the forecast iconImage
 function findKeyFromValue(obj, value){
     Object.keys(obj).forEach(function(key){
@@ -257,29 +282,26 @@ function findKeyFromValue(obj, value){
     var result = "No key corresponds to that value."
     return result;
 };
-
+// Creates either a focus card or 5 day forecast card
 function createCard(object){
-    console.log(`CreateCard Object:`);
-    console.log(object);
+    // console.log(`CreateCard Object:`);
+    // console.log(object);
     // I'm concerned of having two ids the same
     var column = $(`<div class="col mb-2"></div>`);
-    var cardWrapper = $(`<div class="card w-${object.html.width}" id="${object.timeData.day}"></div>`);
-    var cardBody = $(`<div class="card-body" id="${object.timeData.day}"></div>`);
+    var cardWrapper = $(`<div class="card w-${object.html.width}" data-day="${object.timeData.day}"></div>`);
+    var cardBody = $(`<div class="card-body" data-day="${object.timeData.day}"></div>`);
     if (object.html.type === "focus"){
-        // var row0 = $(``);
-        var row0 = $(`<h3 id="${object.timeData.day}">Current Weather in ${object.location.city}, ${object.location.country}</h3>\n<h3>${object.timeData.fullDate}</h3>`);
-        // var row0 = $(`<h3 id="${object.timeData.day}">${object.timeData.fullDate}</h3>`);
-        var row1 = $(`<h5 class="card-title tempDisp" id="${object.timeData.day}">${object.weatherData.weatherIcon}${Math.round(object.weatherData.temp)}°F</h5>`);
-        var row2 = $(`<p class="card-text humidityDisp" id="${object.timeData.day}">Humidity: ${object.weatherData.humidity}%</p>`);
-        var row3 = $(`<p class="card-text windDisp" id="${object.timeData.day}">Wind Speed: ${object.weatherData.windSpeed}m/h</p>`);
-        var row4 = $(`<p class="card-text uvIndexDisp" id="${object.timeData.day}">UV Index: ${object.weatherData.uvIndex}</p>`); // This doesn't always arrive in time
+        var row0 = $(`<h3 id="cityBoy" data-city="${object.location.city}, ${object.location.country}">Today in ${object.location.city}, ${object.location.country}</h3>\n<h3>${object.timeData.fullDate}</h3>`);
+        var row1 = $(`<h5 class="card-title tempDisp" data-day="${object.timeData.day}">${object.weatherData.weatherIcon}${Math.round(object.weatherData.temp)}°F</h5>`);
+        var row2 = $(`<p class="card-text humidityDisp" data-day="${object.timeData.day}">Humidity: ${object.weatherData.humidity}%</p>`);
+        var row3 = $(`<p class="card-text windDisp" data-day="${object.timeData.day}">Wind Speed: ${object.weatherData.windSpeed}m/h</p>`);
+        var row4 = $(`<p class="card-text uvIndexDisp" data-day="${object.timeData.day}">UV Index: ${object.weatherData.uvIndex}</p>`); // This doesn't always arrive in time
     } else if (object.html.type === "forecast") {
-        // var row0 = $(``);
-        var row0 = $(`<h5 class="card-text text-center date mb-0" id="${object.timeData.day}">Date:</h5>`);
-        var row1 = $(`<p class="card-text text-center dateDisp mb-0" id="${object.timeData.day}">${object.timeData.shortday} ${object.timeData.dayOfMonth}</p>`);
-        var row2 = $(`<p class="card-title text-center iconDisp mb-0" id="${object.timeData.day}">${object.weatherData.weatherIcon}</p>`);
-        var row3 = $(`<p class="card-text text-center tempDisp mb-0" id="${object.timeData.day}">Temp: ${object.weatherData.temp}°F</p>`);
-        var row4 = $(`<p class="card-text text-center humidityDisp mb-0" id="${object.timeData.day}">RH: ${object.weatherData.humidity}%</p>`);
+        var row0 = $(`<h5 class="card-text text-center date mb-0" data-day="${object.timeData.day}">Date:</h5>`);
+        var row1 = $(`<p class="card-text text-center dateDisp mb-0" data-day="${object.timeData.day}">${object.timeData.shortday} ${object.timeData.dayOfMonth}</p>`);
+        var row2 = $(`<p class="card-title text-center iconDisp mb-0" data-day="${object.timeData.day}">${object.weatherData.weatherIcon}</p>`);
+        var row3 = $(`<p class="card-text text-center tempDisp mb-0" data-day="${object.timeData.day}">Temp: ${object.weatherData.temp}°F</p>`);
+        var row4 = $(`<p class="card-text text-center humidityDisp mb-0" data-day="${object.timeData.day}">RH: ${object.weatherData.humidity}%</p>`);
     };
     // Appending to page
     // $(object.html.appendTo).empty();
@@ -292,6 +314,7 @@ function createCard(object){
     $(cardBody).append(row4);
     $(object.html.appendTo).append(column);
 }
+// Makes a weatherObj with all the information I want from the AJAX call
 function weatherObj(reportObj){
     var fcMoment = moment(reportObj.dt_txt);
     // Object with 2 nested objects containing time and weather data
@@ -321,18 +344,7 @@ function weatherObj(reportObj){
     };
     return forecastData;
 }
-function getUVIndex(lat, lon){
-    var queryURL = `http://api.openweathermap.org/data/2.5/uvi?appid=${APIKey}&lat=${lat}&lon=${lon}`;
-    $.ajax({
-        url: queryURL,
-        method: "GET"
-    }).then(function(response){
-        uvIndex = response.value;
-        $(`.uvIndexDisp`).text("UV Index: " + uvIndex); 
 
-    })
-    return uvIndex;
-}
 
 
 init();
