@@ -62,6 +62,9 @@ function init(){
     // Local Storage
     getLocalStorage();
     renderButtons(cities);
+    if (cities[0] === undefined){
+        return;
+    }
     var location = getCity(cities[cities.length-1], "init");
     getWeatherAPIs(location);
 };  
