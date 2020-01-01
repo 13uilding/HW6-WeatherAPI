@@ -274,7 +274,7 @@ function getForecast(city, countryCode){
 }
 // AJAX openWeatherAPI call for UVIndex
 function getUVIndex(lat, lon){
-    var queryURL = `http://api.openweathermap.org/data/2.5/uvi?appid=${APIKey}&lat=${lat}&lon=${lon}`;
+    var queryURL = `https://api.openweathermap.org/data/2.5/uvi?appid=${APIKey}&lat=${lat}&lon=${lon}`;
     $.ajax({
         url: queryURL,
         method: "GET"
